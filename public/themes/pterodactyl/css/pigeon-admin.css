@@ -1,0 +1,1213 @@
+/* ============================================================
+ * Pigeon Panel - Administration Glass Overlay
+ *
+ * A self-contained dark-glass restyle of the AdminLTE server-
+ * rendered control area. Mirrors the design tokens of the React
+ * client (resources/scripts/assets/css/pigeon.css) so the admin
+ * area feels like part of the same product.
+ *
+ * Scoped under `body.pigeon-admin` so it cleanly overrides the
+ * AdminLTE `skin-blue` theme without touching other surfaces.
+ * ============================================================ */
+
+body.pigeon-admin {
+    --pg-n-50: 250 250 250;
+    --pg-n-100: 244 244 245;
+    --pg-n-200: 228 228 231;
+    --pg-n-300: 212 212 216;
+    --pg-n-400: 161 161 170;
+    --pg-n-500: 113 113 122;
+    --pg-n-600: 63 63 70;
+    --pg-n-700: 39 39 45;
+    --pg-n-800: 22 22 27;
+    --pg-n-900: 14 14 18;
+
+    --pg-canvas: rgb(var(--pg-n-800));
+    --pg-surface: rgb(var(--pg-n-700));
+    --pg-surface-2: rgb(var(--pg-n-600));
+    --pg-elevated: rgb(var(--pg-n-600));
+
+    --pg-text: rgb(var(--pg-n-100));
+    --pg-text-muted: rgb(var(--pg-n-400));
+    --pg-text-faint: rgb(var(--pg-n-500));
+
+    --pg-border: rgb(var(--pg-n-600) / 0.55);
+    --pg-border-strong: rgb(var(--pg-n-500) / 0.45);
+
+    --pg-accent-50: #eef0fe;
+    --pg-accent-100: #e0e3fe;
+    --pg-accent-200: #c4c9fd;
+    --pg-accent-300: #a3aafb;
+    --pg-accent-400: #848ef8;
+    --pg-accent-500: #6c75f2;
+    --pg-accent-600: #5a61e3;
+    --pg-accent-700: #4b50c9;
+    --pg-accent: var(--pg-accent-500);
+    --pg-accent-strong: var(--pg-accent-600);
+
+    --pg-success: rgb(34 197 94);
+    --pg-danger: rgb(239 68 68);
+    --pg-warning: rgb(245 158 11);
+    --pg-info: var(--pg-accent-500);
+
+    --pg-radius-sm: 6px;
+    --pg-radius: 10px;
+    --pg-radius-full: 9999px;
+
+    --pg-glass-opacity: 0.66;
+    --pg-blur: 18px;
+    --pg-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+    --pg-shadow: 0 4px 24px -8px rgb(0 0 0 / 0.35);
+    --pg-shadow-lg: 0 16px 48px -12px rgb(0 0 0 / 0.5);
+
+    color-scheme: dark;
+}
+
+/* ============================================================
+ * Base
+ * ============================================================ */
+
+body.pigeon-admin {
+    background-color: var(--pg-canvas);
+    background-image: radial-gradient(
+            1100px 520px at calc(100% + 120px) -160px,
+            color-mix(in srgb, var(--pg-accent-500) 5.5%, transparent),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 480px at -140px calc(100% + 120px),
+            color-mix(in srgb, var(--pg-accent-600) 4.5%, transparent),
+            transparent 55%
+        );
+    background-attachment: fixed;
+    color: var(--pg-text);
+    font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.875rem;
+    -webkit-font-smoothing: antialiased;
+}
+
+.pigeon-admin .wrapper {
+    background: transparent;
+}
+
+.pigeon-admin a {
+    color: var(--pg-accent-400);
+}
+
+.pigeon-admin a:hover,
+.pigeon-admin a:focus {
+    color: var(--pg-accent-300);
+}
+
+.pigeon-admin code,
+.pigeon-admin kbd {
+    background: var(--pg-surface-2);
+    border: 1px solid var(--pg-border);
+    border-radius: 5px;
+    color: var(--pg-accent-300);
+    padding: 0.1rem 0.35rem;
+    font-size: 0.8em;
+}
+
+/* ============================================================
+ * Header
+ * ============================================================ */
+
+.pigeon-admin .main-header {
+    background: rgb(var(--pg-n-700) / var(--pg-glass-opacity));
+    backdrop-filter: blur(var(--pg-blur));
+    -webkit-backdrop-filter: blur(var(--pg-blur));
+    border-bottom: 1px solid var(--pg-border);
+    box-shadow: var(--pg-shadow-sm);
+}
+
+.pigeon-admin .main-header .logo {
+    background: transparent;
+    color: var(--pg-text);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    border-bottom: 0;
+}
+
+.pigeon-admin .main-header .logo:hover {
+    background: rgb(var(--pg-n-600) / 0.4);
+    color: var(--pg-accent-300);
+}
+
+.pigeon-admin .main-header .navbar {
+    background: transparent;
+    border-bottom: 0;
+}
+
+.pigeon-admin .main-header .navbar .sidebar-toggle {
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .main-header .navbar .sidebar-toggle:hover {
+    background: rgb(var(--pg-n-600) / 0.4);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .main-header .navbar .sidebar-toggle .icon-bar {
+    border-radius: 2px;
+}
+
+.pigeon-admin .main-header .navbar-custom-menu .navbar-nav > li > a {
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .main-header .navbar-custom-menu .navbar-nav > li > a:hover,
+.pigeon-admin .main-header .navbar-custom-menu .navbar-nav > li > a:focus {
+    background: rgb(var(--pg-n-600) / 0.4);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .main-header .navbar .user-menu > .dropdown-menu {
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    background: var(--pg-surface);
+    box-shadow: var(--pg-shadow-lg);
+}
+
+.pigeon-admin .main-header .navbar .user-menu .user-header {
+    background: transparent;
+    height: auto;
+    padding: 1.25rem;
+}
+
+.pigeon-admin .main-header .navbar .user-menu .user-header img {
+    border: 2px solid var(--pg-accent-500);
+}
+
+.pigeon-admin .main-header .navbar .user-menu .user-header p,
+.pigeon-admin .main-header .navbar .user-menu .user-header small {
+    color: var(--pg-text);
+}
+
+/* ============================================================
+ * Sidebar
+ * ============================================================ */
+
+.pigeon-admin .main-sidebar {
+    background: rgb(var(--pg-n-900) / 0.85);
+    border-right: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .sidebar {
+    background: transparent;
+}
+
+.pigeon-admin .sidebar .sidebar-menu > li.header {
+    color: var(--pg-text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.pigeon-admin .sidebar-menu > li > a {
+    color: var(--pg-text-muted);
+    border-left: 2px solid transparent;
+    transition: color 150ms, background 150ms, border-color 150ms;
+}
+
+.pigeon-admin .sidebar-menu > li > a:hover,
+.pigeon-admin .sidebar-menu > li > a:focus {
+    background: rgb(var(--pg-n-700) / 0.7);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .sidebar-menu > li.active > a,
+.pigeon-admin .sidebar-menu > li > a.active {
+    background: color-mix(in srgb, var(--pg-accent-500) 14%, transparent);
+    color: var(--pg-accent-300);
+    border-left-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .sidebar-menu > li.active > a:hover {
+    color: var(--pg-accent-300);
+}
+
+.pigeon-admin .sidebar-menu > li > .treeview-menu {
+    background: rgb(0 0 0 / 0.18);
+    border-left: 2px solid var(--pg-border);
+}
+
+.pigeon-admin .sidebar-menu .treeview-menu > li > a {
+    color: var(--pg-text-faint);
+}
+
+.pigeon-admin .sidebar-menu .treeview-menu > li > a:hover {
+    color: var(--pg-text);
+    background: transparent;
+}
+
+.pigeon-admin .sidebar-menu .treeview-menu > li.active > a {
+    color: var(--pg-accent-400);
+}
+
+.pigeon-admin .sidebar-menu > li > .treeview-menu {
+    margin: 0.25rem 0;
+}
+
+.pigeon-admin .sidebar-menu > li.treeview > a:after {
+    color: var(--pg-text-faint);
+}
+
+/* ============================================================
+ * Content wrapper
+ * ============================================================ */
+
+.pigeon-admin .content-wrapper {
+    background: transparent;
+}
+
+.pigeon-admin .content-header {
+    padding-bottom: 0.5rem;
+}
+
+.pigeon-admin .content-header > h1 {
+    color: var(--pg-text);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-size: 1.4rem;
+}
+
+.pigeon-admin .content-header > h1 > small {
+    color: var(--pg-text-muted);
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.pigeon-admin .breadcrumb {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius-full);
+    padding: 0.35rem 1rem;
+}
+
+.pigeon-admin .breadcrumb > li + li:before {
+    color: var(--pg-text-faint);
+}
+
+.pigeon-admin .breadcrumb > li > a {
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .breadcrumb > li > a:hover {
+    color: var(--pg-accent-400);
+}
+
+.pigeon-admin .breadcrumb > .active {
+    color: var(--pg-text);
+}
+
+/* ============================================================
+ * Boxes / cards
+ * ============================================================ */
+
+.pigeon-admin .box {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow-sm);
+}
+
+.pigeon-admin .box.box-solid {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .box.box-success {
+    border-top: 2px solid var(--pg-success);
+}
+
+.pigeon-admin .box.box-danger {
+    border-top: 2px solid var(--pg-danger);
+}
+
+.pigeon-admin .box.box-warning {
+    border-top: 2px solid var(--pg-warning);
+}
+
+.pigeon-admin .box.box-primary {
+    border-top: 2px solid var(--pg-accent-500);
+}
+
+.pigeon-admin .box-header {
+    background: transparent;
+    color: var(--pg-text);
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .box-header.with-border {
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .box-header .box-title {
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.pigeon-admin .box-header > .box-tools {
+    padding: 0;
+}
+
+.pigeon-admin .box-body {
+    padding: 1.1rem;
+    color: var(--pg-text);
+}
+
+.pigeon-admin .box-footer {
+    background: transparent;
+    border-top: 1px solid var(--pg-border);
+    border-radius: 0 0 var(--pg-radius) var(--pg-radius);
+    padding: 0.9rem 1.1rem;
+}
+
+.pigeon-admin .box.box-solid > .box-header .btn {
+    background: transparent;
+}
+
+.pigeon-admin .box .btn-box-tool {
+    color: var(--pg-text-faint);
+}
+
+.pigeon-admin .box .btn-box-tool:hover {
+    color: var(--pg-text);
+}
+
+/* ============================================================
+ * Small boxes / info boxes
+ * ============================================================ */
+
+.pigeon-admin .small-box {
+    border-radius: var(--pg-radius);
+    border: 1px solid var(--pg-border);
+    box-shadow: var(--pg-shadow-sm);
+    background: var(--pg-surface);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .small-box > .inner h3 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.pigeon-admin .small-box > .small-box-footer {
+    background: rgb(0 0 0 / 0.15);
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .small-box > .small-box-footer:hover {
+    color: var(--pg-text);
+    background: rgb(0 0 0 / 0.25);
+}
+
+.pigeon-admin .info-box {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow-sm);
+}
+
+.pigeon-admin .info-box .info-box-content .info-box-text,
+.pigeon-admin .info-box .info-box-content .info-box-number {
+    color: var(--pg-text);
+}
+
+/* ============================================================
+ * Buttons
+ * ============================================================ */
+
+.pigeon-admin .btn {
+    border-radius: var(--pg-radius-sm);
+    font-weight: 500;
+    transition: background 150ms, border-color 150ms, color 150ms, box-shadow 150ms, opacity 150ms;
+}
+
+.pigeon-admin .btn-primary {
+    background: var(--pg-accent-500);
+    border-color: var(--pg-accent-500);
+    color: #fff;
+}
+
+.pigeon-admin .btn-primary:hover,
+.pigeon-admin .btn-primary:focus,
+.pigeon-admin .btn-primary.active {
+    background: var(--pg-accent-600);
+    border-color: var(--pg-accent-600);
+    color: #fff;
+}
+
+.pigeon-admin .btn-success {
+    background: rgb(22 163 74);
+    border-color: rgb(22 163 74);
+}
+
+.pigeon-admin .btn-success:hover {
+    background: rgb(21 128 61);
+    border-color: rgb(21 128 61);
+}
+
+.pigeon-admin .btn-danger {
+    background: rgb(220 38 38);
+    border-color: rgb(220 38 38);
+}
+
+.pigeon-admin .btn-danger:hover {
+    background: rgb(185 28 28);
+    border-color: rgb(185 28 28);
+}
+
+.pigeon-admin .btn-warning {
+    background: rgb(217 119 6);
+    border-color: rgb(217 119 6);
+}
+
+.pigeon-admin .btn-warning:hover {
+    background: rgb(180 83 9);
+    border-color: rgb(180 83 9);
+}
+
+.pigeon-admin .btn-info {
+    background: var(--pg-accent-400);
+    border-color: var(--pg-accent-400);
+}
+
+.pigeon-admin .btn-info:hover {
+    background: var(--pg-accent-500);
+    border-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .btn-default {
+    background: var(--pg-surface-2);
+    border-color: var(--pg-border-strong);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .btn-default:hover,
+.pigeon-admin .btn-default:focus,
+.pigeon-admin .btn-default.active {
+    background: var(--pg-elevated);
+    border-color: var(--pg-border-strong);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .btn[disabled],
+.pigeon-admin .btn.disabled {
+    opacity: 0.45;
+}
+
+.pigeon-admin .btn-group .btn {
+    margin: 0;
+}
+
+/* ============================================================
+ * Forms
+ * ============================================================ */
+
+.pigeon-admin .form-control {
+    background: var(--pg-canvas);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius-sm);
+    color: var(--pg-text);
+    box-shadow: none;
+    transition: border-color 150ms, box-shadow 150ms;
+}
+
+.pigeon-admin .form-control:focus {
+    border-color: var(--pg-accent-500);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pg-accent-500) 35%, transparent);
+}
+
+.pigeon-admin .form-control[disabled],
+.pigeon-admin .form-control[readonly] {
+    background: var(--pg-surface-2);
+    color: var(--pg-text-faint);
+}
+
+.pigeon-admin .input-group-addon {
+    background: var(--pg-surface-2);
+    border: 1px solid var(--pg-border);
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .help-block {
+    color: var(--pg-text-faint);
+}
+
+.pigeon-admin .form-group label {
+    color: var(--pg-text-muted);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.pigeon-admin .has-error .form-control {
+    border-color: var(--pg-danger);
+    box-shadow: none;
+}
+
+.pigeon-admin .has-error .control-label,
+.pigeon-admin .has-error .help-block {
+    color: var(--pg-danger);
+}
+
+.pigeon-admin .has-success .form-control {
+    border-color: var(--pg-success);
+    box-shadow: none;
+}
+
+.pigeon-admin .has-success .control-label,
+.pigeon-admin .has-success .help-block {
+    color: var(--pg-success);
+}
+
+.pigeon-admin input[type='checkbox'],
+.pigeon-admin input[type='radio'] {
+    accent-color: var(--pg-accent-500);
+}
+
+/* Custom checkbox / radio (Bootstrap snippet in checkbox.css) — dark glass */
+.pigeon-admin .checkbox label::before,
+.pigeon-admin .radio label::before {
+    border: 1px solid var(--pg-border-strong);
+    background-color: var(--pg-canvas);
+}
+
+.pigeon-admin .checkbox label::after {
+    color: var(--pg-text);
+}
+
+.pigeon-admin .radio label::after {
+    background-color: var(--pg-text-muted);
+}
+
+.pigeon-admin .checkbox input[type='checkbox']:disabled + label::before,
+.pigeon-admin .radio input[type='radio']:disabled + label::before {
+    background-color: var(--pg-surface-2);
+}
+
+.pigeon-admin .checkbox-primary input[type='checkbox']:checked + label::before,
+.pigeon-admin .radio-primary input[type='radio']:checked + label::before {
+    background-color: var(--pg-accent-500);
+    border-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .radio-primary input[type='radio'] + label::after,
+.pigeon-admin .radio-primary input[type='radio']:checked + label::after {
+    background-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .checkbox-danger input[type='checkbox']:checked + label::before {
+    background-color: var(--pg-danger);
+    border-color: var(--pg-danger);
+}
+
+.pigeon-admin .radio-danger input[type='radio'] + label::after,
+.pigeon-admin .radio-danger input[type='radio']:checked + label::before,
+.pigeon-admin .radio-danger input[type='radio']:checked + label::after {
+    background-color: var(--pg-danger);
+    border-color: var(--pg-danger);
+}
+
+.pigeon-admin .checkbox-info input[type='checkbox']:checked + label::before {
+    background-color: var(--pg-accent-400);
+    border-color: var(--pg-accent-400);
+}
+
+.pigeon-admin .radio-info input[type='radio'] + label::after,
+.pigeon-admin .radio-info input[type='radio']:checked + label::before,
+.pigeon-admin .radio-info input[type='radio']:checked + label::after {
+    background-color: var(--pg-accent-400);
+    border-color: var(--pg-accent-400);
+}
+
+.pigeon-admin .checkbox-warning input[type='checkbox']:checked + label::before {
+    background-color: var(--pg-warning);
+    border-color: var(--pg-warning);
+}
+
+.pigeon-admin .radio-warning input[type='radio'] + label::after,
+.pigeon-admin .radio-warning input[type='radio']:checked + label::before,
+.pigeon-admin .radio-warning input[type='radio']:checked + label::after {
+    background-color: var(--pg-warning);
+    border-color: var(--pg-warning);
+}
+
+.pigeon-admin .checkbox-success input[type='checkbox']:checked + label::before {
+    background-color: var(--pg-success);
+    border-color: var(--pg-success);
+}
+
+.pigeon-admin .radio-success input[type='radio'] + label::after,
+.pigeon-admin .radio-success input[type='radio']:checked + label::before,
+.pigeon-admin .radio-success input[type='radio']:checked + label::after {
+    background-color: var(--pg-success);
+    border-color: var(--pg-success);
+}
+
+/* Select2 */
+.pigeon-admin .select2-container .select2-selection--single,
+.pigeon-admin .select2-container .select2-selection--multiple {
+    background: var(--pg-canvas);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius-sm);
+    height: 34px;
+    color: var(--pg-text);
+}
+
+.pigeon-admin .select2-container .select2-selection--single .select2-selection__rendered {
+    color: var(--pg-text);
+    line-height: 34px;
+}
+
+.pigeon-admin .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 34px;
+}
+
+.pigeon-admin .select2-dropdown {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius-sm);
+    box-shadow: var(--pg-shadow-lg);
+}
+
+.pigeon-admin .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: color-mix(in srgb, var(--pg-accent-500) 30%, transparent);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .select2-container--default .select2-results__option[aria-selected='true'] {
+    background: color-mix(in srgb, var(--pg-accent-500) 14%, transparent);
+}
+
+/* ============================================================
+ * Tables
+ * ============================================================ */
+
+.pigeon-admin .table {
+    color: var(--pg-text);
+}
+
+.pigeon-admin .table > thead > tr > th {
+    border-bottom: 1px solid var(--pg-border-strong);
+    color: var(--pg-text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.pigeon-admin .table > tbody > tr > td,
+.pigeon-admin .table > tbody > tr > th,
+.pigeon-admin .table > tfoot > tr > td,
+.pigeon-admin .table > tfoot > tr > th {
+    border-top: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .table > tbody > tr:hover > td,
+.pigeon-admin .table > tbody > tr:hover > th {
+    background: rgb(var(--pg-n-600) / 0.35);
+}
+
+.pigeon-admin .table > tbody > tr.active > td {
+    background: color-mix(in srgb, var(--pg-accent-500) 10%, transparent);
+}
+
+.pigeon-admin .table-hover > tbody > tr:hover {
+    background: rgb(var(--pg-n-600) / 0.35);
+}
+
+.pigeon-admin .table-bordered,
+.pigeon-admin .table-bordered > thead > tr > th,
+.pigeon-admin .table-bordered > tbody > tr > td {
+    border-color: var(--pg-border);
+}
+
+.pigeon-admin .table-striped > tbody > tr:nth-of-type(odd) {
+    background: rgb(var(--pg-n-900) / 0.35);
+}
+
+.pigeon-admin .table .text-muted {
+    color: var(--pg-text-faint);
+}
+
+/* ============================================================
+ * Alerts
+ * ============================================================ */
+
+.pigeon-admin .alert {
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    background: var(--pg-surface);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .alert-success {
+    background: color-mix(in srgb, rgb(34 197 94) 12%, var(--pg-surface));
+    border-color: color-mix(in srgb, rgb(34 197 94) 30%, transparent);
+    color: rgb(134 239 172);
+}
+
+.pigeon-admin .alert-info {
+    background: color-mix(in srgb, var(--pg-accent-500) 12%, var(--pg-surface));
+    border-color: color-mix(in srgb, var(--pg-accent-500) 30%, transparent);
+    color: var(--pg-accent-200);
+}
+
+.pigeon-admin .alert-warning {
+    background: color-mix(in srgb, rgb(245 158 11) 12%, var(--pg-surface));
+    border-color: color-mix(in srgb, rgb(245 158 11) 30%, transparent);
+    color: rgb(253 224 71);
+}
+
+.pigeon-admin .alert-danger {
+    background: color-mix(in srgb, rgb(239 68 68) 12%, var(--pg-surface));
+    border-color: color-mix(in srgb, rgb(239 68 68) 30%, transparent);
+    color: rgb(252 165 165);
+}
+
+.pigeon-admin .alert .close {
+    color: inherit;
+    opacity: 0.6;
+}
+
+.pigeon-admin .alert .close:hover {
+    opacity: 1;
+}
+
+/* ============================================================
+ * Modals
+ * ============================================================ */
+
+.pigeon-admin .modal-content {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius-lg, 14px);
+    box-shadow: var(--pg-shadow-lg);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .modal-header {
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .modal-header .modal-title {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.pigeon-admin .modal-footer {
+    border-top: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .modal-header .close {
+    color: var(--pg-text-muted);
+    text-shadow: none;
+    opacity: 0.7;
+}
+
+.pigeon-admin .modal-header .close:hover {
+    opacity: 1;
+    color: var(--pg-text);
+}
+
+.pigeon-admin .modal-backdrop.in {
+    opacity: 0.6;
+}
+
+/* ============================================================
+ * Pagination
+ * ============================================================ */
+
+.pigeon-admin .pagination > li > a,
+.pigeon-admin .pagination > li > span {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .pagination > li > a:hover,
+.pigeon-admin .pagination > li > span:hover {
+    background: var(--pg-surface-2);
+    border-color: var(--pg-border-strong);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .pagination > .active > a,
+.pigeon-admin .pagination > .active > span,
+.pigeon-admin .pagination > .active > a:hover,
+.pigeon-admin .pagination > .active > span:hover {
+    background: var(--pg-accent-500);
+    border-color: var(--pg-accent-500);
+    color: #fff;
+}
+
+.pigeon-admin .pagination > .disabled > a,
+.pigeon-admin .pagination > .disabled > span {
+    background: var(--pg-surface);
+    color: var(--pg-text-faint);
+}
+
+/* ============================================================
+ * Nav tabs
+ * ============================================================ */
+
+.pigeon-admin .nav-tabs {
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .nav-tabs > li > a {
+    color: var(--pg-text-muted);
+    border-radius: var(--pg-radius-sm) var(--pg-radius-sm) 0 0;
+    border-color: transparent;
+}
+
+.pigeon-admin .nav-tabs > li > a:hover,
+.pigeon-admin .nav-tabs > li > a:focus {
+    background: rgb(var(--pg-n-600) / 0.4);
+    border-color: transparent;
+    color: var(--pg-text);
+}
+
+.pigeon-admin .nav-tabs > li.active > a,
+.pigeon-admin .nav-tabs > li.active > a:hover,
+.pigeon-admin .nav-tabs > li.active > a:focus {
+    background: var(--pg-surface);
+    border-color: var(--pg-border) var(--pg-border) transparent;
+    color: var(--pg-accent-300);
+}
+
+.pigeon-admin .nav-pills > li > a {
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .nav-pills > li > a:hover {
+    background: rgb(var(--pg-n-600) / 0.4);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .nav-pills > li.active > a,
+.pigeon-admin .nav-pills > li.active > a:hover {
+    background: var(--pg-accent-500);
+    color: #fff;
+}
+
+/* AdminLTE nav-tabs-custom chrome (settings / server sub-navigation) */
+.pigeon-admin .nav-tabs-custom {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow-sm);
+}
+
+.pigeon-admin .tab-content {
+    background: var(--pg-surface);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .nav-tabs-custom > .tab-content {
+    background: var(--pg-surface);
+    border-top: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs {
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li > a {
+    color: var(--pg-text-muted);
+    border-color: transparent;
+    border-radius: var(--pg-radius-sm) var(--pg-radius-sm) 0 0;
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li > a:hover,
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li > a:focus {
+    background: rgb(var(--pg-n-600) / 0.4);
+    border-color: transparent;
+    color: var(--pg-text);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active {
+    border-top-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li:hover {
+    border-top-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.tab-danger:hover {
+    border-top-color: var(--pg-danger);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.tab-success:hover {
+    border-top-color: var(--pg-success);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.tab-info:hover {
+    border-top-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.tab-warning:hover {
+    border-top-color: var(--pg-warning);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active > a,
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active > a:hover,
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active > a:focus {
+    background: var(--pg-surface);
+    border-top-color: transparent;
+    border-left-color: var(--pg-border);
+    border-right-color: var(--pg-border);
+    color: var(--pg-accent-300);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active.tab-danger > a {
+    border-top-color: var(--pg-danger);
+    color: var(--pg-danger);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active.tab-success > a {
+    border-top-color: var(--pg-success);
+    color: var(--pg-success);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active.tab-info > a {
+    border-top-color: var(--pg-accent-500);
+    color: var(--pg-accent-400);
+}
+
+.pigeon-admin .nav-tabs-custom > .nav-tabs > li.active.tab-warning > a {
+    border-top-color: var(--pg-warning);
+    color: var(--pg-warning);
+}
+
+.pigeon-admin .nav-tabs-custom.nav-tabs-floating > .nav-tabs {
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.pigeon-admin .nav-tabs-custom.nav-tabs-floating > .nav-tabs > li:first-child.active > a {
+    border-left-color: var(--pg-border);
+}
+
+/* ============================================================
+ * Labels / badges
+ * ============================================================ */
+
+.pigeon-admin .label {
+    border-radius: var(--pg-radius-full);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.pigeon-admin .badge {
+    background: var(--pg-surface-2);
+    color: var(--pg-text-muted);
+    font-weight: 600;
+}
+
+.pigeon-admin .label-success {
+    background: color-mix(in srgb, rgb(34 197 94) 20%, transparent);
+    color: rgb(74 222 128);
+}
+
+.pigeon-admin .label-danger {
+    background: color-mix(in srgb, rgb(239 68 68) 20%, transparent);
+    color: rgb(248 113 113);
+}
+
+.pigeon-admin .label-warning {
+    background: color-mix(in srgb, rgb(245 158 11) 20%, transparent);
+    color: rgb(251 191 36);
+}
+
+.pigeon-admin .label-info {
+    background: color-mix(in srgb, var(--pg-accent-500) 20%, transparent);
+    color: var(--pg-accent-300);
+}
+
+.pigeon-admin .label-default {
+    background: var(--pg-surface-2);
+    color: var(--pg-text-muted);
+}
+
+/* ============================================================
+ * Callouts / wells
+ * ============================================================ */
+
+.pigeon-admin .callout {
+    border-radius: var(--pg-radius);
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-left-width: 3px;
+}
+
+.pigeon-admin .callout-success {
+    border-left-color: var(--pg-success);
+}
+
+.pigeon-admin .callout-info {
+    border-left-color: var(--pg-accent-500);
+}
+
+.pigeon-admin .callout-warning {
+    border-left-color: var(--pg-warning);
+}
+
+.pigeon-admin .callout-danger {
+    border-left-color: var(--pg-danger);
+}
+
+.pigeon-admin .well {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: none;
+    color: var(--pg-text);
+}
+
+/* ============================================================
+ * Misc
+ * ============================================================ */
+
+.pigeon-admin .text-muted {
+    color: var(--pg-text-faint) !important;
+}
+
+.pigeon-admin .text-danger {
+    color: var(--pg-danger) !important;
+}
+
+.pigeon-admin .text-success {
+    color: var(--pg-success) !important;
+}
+
+.pigeon-admin .text-warning {
+    color: var(--pg-warning) !important;
+}
+
+.pigeon-admin .text-info {
+    color: var(--pg-accent-400) !important;
+}
+
+.pigeon-admin .bg-black,
+.pigeon-admin .bg-gray {
+    background: var(--pg-surface) !important;
+}
+
+.pigeon-admin .dropdown-menu {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow-lg);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .dropdown-menu > li > a {
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .dropdown-menu > li > a:hover,
+.pigeon-admin .dropdown-menu > li > a:focus {
+    background: rgb(var(--pg-n-600) / 0.4);
+    color: var(--pg-text);
+}
+
+.pigeon-admin .divider {
+    background: var(--pg-border);
+}
+
+.pigeon-admin .progress {
+    background: var(--pg-canvas);
+    border-radius: var(--pg-radius-full);
+    box-shadow: none;
+}
+
+.pigeon-admin .progress-bar {
+    background: var(--pg-accent-500);
+    box-shadow: none;
+}
+
+.pigeon-admin .timeline:before {
+    background: var(--pg-border);
+}
+
+.pigeon-admin .users-list > li img {
+    border-radius: 50%;
+}
+
+.pigeon-admin .content-header > .breadcrumb {
+    top: 0.75rem;
+}
+
+.pigeon-admin .main-footer {
+    background: rgb(var(--pg-n-900) / 0.6);
+    border-top: 1px solid var(--pg-border);
+    color: var(--pg-text-muted);
+}
+
+.pigeon-admin .main-footer a {
+    color: var(--pg-accent-400);
+}
+
+/* Tooltip */
+.pigeon-admin .tooltip-inner {
+    background: var(--pg-text);
+    color: rgb(var(--pg-n-900));
+    border-radius: var(--pg-radius-sm);
+}
+
+.pigeon-admin .tooltip.top .tooltip-arrow {
+    border-top-color: var(--pg-text);
+}
+
+/* SweetAlert */
+.pigeon-admin .sweet-alert {
+    background: var(--pg-surface);
+    border: 1px solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow-lg);
+    color: var(--pg-text);
+}
+
+/* Scrollbars */
+.pigeon-admin ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.pigeon-admin ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.pigeon-admin ::-webkit-scrollbar-thumb {
+    background: rgb(var(--pg-n-600));
+    border-radius: var(--pg-radius-full);
+}
+
+.pigeon-admin ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--pg-n-500));
+}
+
+/* ============================================================
+ * Responsive
+ * ============================================================ */
+
+@media (max-width: 767px) {
+    .pigeon-admin .main-header .logo {
+        border-bottom: 1px solid var(--pg-border);
+    }
+
+    .pigeon-admin .main-sidebar {
+        padding-top: 50px;
+    }
+
+    .pigeon-admin .main-sidebar,
+    .pigeon-admin .left-side {
+        padding-top: 0;
+    }
+}
