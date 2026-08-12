@@ -1,173 +1,68 @@
-# Nook Theme
-NookTheme is a free and open source [Pterodactyl theme](https://pterodactyl.io) designed to be simple, clean, and modern.
+# Pigeon Panel
 
-![Image](https://i.imgur.com/AFjHGBr.png)
+Pigeon Panel is a free, open-source game server management panel built on [Pterodactyl](https://pterodactyl.io) with a modern, clean interface. It adds a full open-registration system, a redesigned authentication experience, and a built-in Theme Studio — all in a single deployable package.
 
-<details>
-<summary>View Screenshots</summary>
+## Features
 
-![Image](https://i.imgur.com/CNxF3iT.png)
-![Image](https://i.imgur.com/IflRtEX.png)
-![Image](https://i.imgur.com/vNLK5jP.png)
-![Image](https://i.imgur.com/dnxV2CS.png)
-</details>
+- **Open registration** — users can create accounts with a username, email, and password (reCAPTCHA-protected), with automatic login after sign-up.
+- **New authentication UI** — split-screen login/register layout, glass-style forms, show/hide password, and mobile-responsive branding.
+- **Theme Studio** — customize colors, gradients, backgrounds, and branding live from the admin area.
+- **Deploy-ready** — a production build of the frontend is shipped alongside the source, with one-command installers for both a plain VPS and a Cloudflare Tunnel setup.
 
 ## Installation
 
-This will update your panel to the latest version of NookTheme panel is based. <br>
-You can see the version in the current branch name.
+### Option A — One-click installer (recommended)
 
-<details>
-<summary>Upgrade PHP</summary>
-
-Before proceeding with the installation steps, ensure that your PHP version is upgraded to 8.2 or newer. Follow the instructions below to upgrade PHP:
-
-1. Update your package list:
-```bash
-sudo apt update
-```
-
-2. Install the required dependencies:
-```bash
-sudo apt install -y software-properties-common
-```
-
-3. Add the PHP repository:
-```bash
-sudo add-apt-repository ppa:ondrej/php
-```
-
-4. Update your package list again:
-```bash
-sudo apt update
-```
-
-5. Install PHP 8.3:
-```bash
-sudo apt install -y php8.3
-```
-
-6. Verify the PHP version:
-```bash
-php -v
-```
-
-</details>
-
-### Enter Maintenance Mode
-
-Whenever you are performing an update you should be sure to place your Panel into maintenance mode. This will prevent
-users from encountering unexpected errors and ensure everything can be updated before users encounter
-potentially new features.
+Upload `pigeon-panel-deploy.zip` and `install.sh` to a fresh **Ubuntu 22.04/24.04 or Debian 12** server, then run as root:
 
 ```bash
-cd /var/www/pterodactyl
-
-php artisan down
+sudo bash install.sh --domain panel.example.com --email admin@example.com
 ```
 
-### Download the theme
+The script installs PHP 8.3, Nginx, MariaDB, Redis, and Composer; sets up the database; writes `.env`; runs migrations; configures SSL via Let's Encrypt; and creates an admin user. See `./install.sh --help` for all options.
 
-The first step in the update process is to download the new panel files from GitHub. The command below will download
-the release archive for the most recent version of Pterodactyl, save it in the current directory and will automatically
-unpack the archive into your current folder.
+### Option B — Cloudflare Tunnel (no open ports)
+
+If you want to host behind a **custom domain via Cloudflare Tunnel** (nothing exposed to the internet, TLS handled at the edge):
 
 ```bash
-curl -L https://github.com/Nookure/NookTheme/releases/latest/download/panel.tar.gz | tar -xzv
+sudo bash install-cloudflare.sh \
+    --domain panel.example.com \
+    --email admin@example.com \
+    --cf-token <cloudflare-api-token>
 ```
 
-Once all of the files are downloaded we need to set the correct permissions on the cache and storage directories to avoid
-any webserver related errors.
+Your domain must be on Cloudflare, and the token needs `Cloudflare Tunnel: Edit` (Account) plus `Zone: Read` and `DNS: Edit` (Zone) permissions.
 
-```bash
-chmod -R 755 storage/* bootstrap/cache
-```
+### Manual deployment
 
-### Update Dependencies
-
-After you've downloaded all of the new files you will need to upgrade the core components of the panel. To do this,
-simply run the commands below and follow any prompts.
+Extract `pigeon-panel-deploy.zip` so that `artisan`, `app/`, and `public/` land at your web root, point your web server at `public/`, then:
 
 ```bash
 composer install --no-dev --optimize-autoloader
-```
-
-### Clear Compiled Template Cache
-
-You'll also want to clear the compiled template cache to ensure that new and modified templates show up correctly for
-users.
-
-```bash
-php artisan view:clear
-php artisan config:clear
-```
-
-### Database Updates
-
-You'll also need to update your database schema for the newest version of Pterodactyl. Running the command below
-will update the schema and ensure the default eggs we ship are up to date (and add any new ones we might have). Just
-remember, _never edit core eggs we ship_! They will be overwritten by this update process.
-
-```bash
+cp .env.example .env
+php artisan key:generate
 php artisan migrate --seed --force
+php artisan storage:link
 ```
 
-### Set Permissions
-
-The last step is to set the proper owner of the files to be the user that runs your webserver. In most cases this
-is `www-data` but can vary from system to system &mdash; sometimes being `nginx`, `caddy`, `apache`, or even `nobody`.
+## Development
 
 ```bash
-# If using NGINX or Apache (not on CentOS):
-chown -R www-data:www-data /var/www/pterodactyl/*
-
-# If using NGINX on CentOS:
-chown -R nginx:nginx /var/www/pterodactyl/*
-
-# If using Apache on CentOS
-chown -R apache:apache /var/www/pterodactyl/*
+npm install          # install frontend dependencies
+npm run build        # development build to public/assets
+npm run build:production  # minified production build
+npm run watch        # watch mode
 ```
 
-### Restarting Queue Workers
+Requirements: Node 22+, PHP 8.2+, Composer, and a MySQL/MariaDB server.
 
-After _every_ update you should restart the queue worker to ensure that the new code is loaded in and used.
+## Tech Stack
 
-```bash
-php artisan queue:restart
-```
-
-### Exit Maintenance Mode
-
-Now that everything has been updated you need to exit maintenance mode so that the Panel can resume accepting
-connections.
-
-```bash
-php artisan up
-```
-
-## Documentation
-
-* [Panel Documentation](https://pterodactyl.io/panel/1.0/getting_started.html)
-* [Wings Documentation](https://pterodactyl.io/wings/1.0/installing.html)
-* [Community Guides](https://pterodactyl.io/community/about.html)
-* Or, get additional help [via Discord](https://discord.nookure.com/)
-
-## Star History
-
-<a href="https://star-history.com/#Nookure/NookTheme&Timeline">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Nookure/NookTheme&type=Timeline&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Nookure/NookTheme&type=Timeline" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Nookure/NookTheme&type=Timeline" />
-  </picture>
-</a>
+- **Frontend:** React, Tailwind CSS, styled-components, Formik
+- **Backend:** Laravel 11, MySQL/MariaDB, Redis
+- **Infrastructure:** Nginx + PHP-FPM, Cloudflare Tunnel (optional)
 
 ## License
 
-Pterodactyl® Copyright © 2015 - 2023 Dane Everitt and contributors.
-
-> Nookure is not affiliated with Pterodactyl® Panel or its contributors.
-
-Pterodactyl code released under the [MIT License](./LICENSE.md).
-
-NookTheme code  edits released under the [GNU GPLv3 License](./NookLicense.md).
+Pigeon Panel is a fork of Pterodactyl. Pterodactyl® Copyright © 2015 - 2023 Dane Everitt and contributors, released under the [MIT License](./LICENSE.md). Modifications released under the same [MIT License](./LICENSE.md).
