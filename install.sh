@@ -1,25 +1,41 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  Pigeon Panel - All-in-one installer
+#  Pigeon Panel - Single-File Installer
 #  Tested on Ubuntu 22.04 / 24.04 and Debian 12.
 #
-#  Handles: system deps, PHP 8.3, Nginx, MariaDB, Redis, Composer, panel
-#  install, database, SSL (Let's Encrypt), cron, queue worker, admin user.
+#  Two deployment modes in one file:
+#    * direct  — expose the panel on 80/443 with Let's Encrypt SSL
+#    * tunnel  — host behind a custom domain via Cloudflare Tunnel
+#                (no open ports; TLS is handled at the Cloudflare edge)
 #
-#  Usage:
-#    bash install.sh --domain panel.example.com --email admin@example.com
+#  Run directly (downloads everything it needs):
+#    sudo bash <(curl -s https://raw.githubusercontent.com/FaaizJohar/CavrixPanel/main/install.sh) \
+#        --domain panel.example.com --email admin@example.com
 #
-#  Optional flags:
-#    --zip <file|url>    Path or URL to pigeon-panel-deploy.zip
-#                        (default: looks for ./pigeon-panel-deploy.zip)
-#    --db-password <pw>  MariaDB password (random if omitted)
-#    --admin-username    Default: admin
-#    --admin-password    Default: random
-#    --admin-name        Default: Pigeon Admin
-#    --timezone          Default: UTC
-#    --no-ssl            Skip Let's Encrypt (HTTP only)
-#    --no-admin          Skip creating an admin user
-#    --help              Show this help
+#  Or place install.sh + pigeon-panel-deploy.zip in the same folder and run:
+#    sudo bash install.sh --domain panel.example.com --email admin@example.com
+#
+#  Cloudflare Tunnel mode requires an API token with:
+#     Account -> Cloudflare Tunnel -> Edit
+#     Zone    -> Zone               -> Read
+#     Zone    -> DNS                -> Edit
+#
+#  Flags:
+#    --zip <file|url>     Panel archive (default: local ./pigeon-panel-deploy.zip,
+#                         otherwise downloaded from the GitHub release)
+#    --domain <domain>    Panel domain (required)
+#    --email <email>      Admin user email (also used for Let's Encrypt in direct mode)
+#    --tunnel             Enable Cloudflare Tunnel mode
+#    --cf-token <token>   Cloudflare API token (implies --tunnel)
+#    --tunnel-name <name> Tunnel name (default: pigeon-panel)
+#    --db-password <pw>   MariaDB password (random if omitted)
+#    --admin-username     Default: admin
+#    --admin-password     Default: random
+#    --admin-name         Default: Pigeon Admin
+#    --timezone           Default: UTC
+#    --no-ssl             Direct mode: skip Let's Encrypt (HTTP only)
+#    --no-admin           Skip creating an admin user
+#    --help               Show this help
 # =============================================================================
 
 set -Eeuo pipefail
@@ -32,9 +48,14 @@ err()   { echo -e "${RED}[x]${NC} $*" >&2; }
 die()   { err "$*"; exit 1; }
 
 INSTALL_DIR="/var/www/pterodactyl"
+ORIGIN_PORT="8080"
+RELEASE_URL="https://github.com/FaaizJohar/CavrixPanel/releases/latest/download/pigeon-panel-deploy.zip"
+TUNNEL_NAME="pigeon-panel"
 ZIP=""
 DOMAIN=""
 EMAIL=""
+CF_TOKEN=""
+MODE="direct"
 DB_PASSWORD=""
 ADMIN_USERNAME="admin"
 ADMIN_PASSWORD=""
@@ -44,7 +65,7 @@ DO_SSL=1
 DO_ADMIN=1
 PANEL_USER="www-data"
 
-usage() { sed -n '2,35p' "$0"; exit 0; }
+usage() { sed -n '2,51p' "$0"; exit 0; }
 
 # ---- argument parsing -------------------------------------------------------
 while [[ $# -gt 0 ]]; do
@@ -52,6 +73,9 @@ while [[ $# -gt 0 ]]; do
         --zip)            ZIP="$2"; shift 2 ;;
         --domain)         DOMAIN="$2"; shift 2 ;;
         --email)          EMAIL="$2"; shift 2 ;;
+        --tunnel)         MODE="tunnel"; shift ;;
+        --cf-token)       CF_TOKEN="$2"; MODE="tunnel"; shift 2 ;;
+        --tunnel-name)    TUNNEL_NAME="$2"; shift 2 ;;
         --db-password)    DB_PASSWORD="$2"; shift 2 ;;
         --admin-username) ADMIN_USERNAME="$2"; shift 2 ;;
         --admin-password) ADMIN_PASSWORD="$2"; shift 2 ;;
@@ -66,26 +90,36 @@ done
 
 [[ $EUID -eq 0 ]] || die "Please run as root: sudo bash install.sh $*"
 
-# ---- zip source -------------------------------------------------------------
+# ---- panel archive ----------------------------------------------------------
 if [[ -z "$ZIP" ]]; then
     if [[ -f "$(dirname "$0")/pigeon-panel-deploy.zip" ]]; then
         ZIP="$(dirname "$0")/pigeon-panel-deploy.zip"
     else
-        die "No zip found. Pass one with --zip <file|url> or place pigeon-panel-deploy.zip next to this script."
+        warn "No local archive found; downloading $RELEASE_URL"
+        curl -fsSL "$RELEASE_URL" -o /tmp/pigeon-panel.zip
+        ZIP=/tmp/pigeon-panel.zip
     fi
 fi
 
-# ---- prompt for required values --------------------------------------------
-[[ -n "$DOMAIN" ]] || read -r -p "Enter the panel domain (e.g. panel.example.com): " DOMAIN
+# ---- prompts ----------------------------------------------------------------
+[[ -n "$DOMAIN" ]] || read -r -p "Enter the panel domain (${MODE} mode): " DOMAIN
 [[ -n "$DOMAIN" ]] || die "A domain is required."
-[[ "$DO_SSL" -eq 1 ]] && { [[ -n "$EMAIL" ]] || read -r -p "Enter your email (for Let's Encrypt + admin user): " EMAIL; }
+[[ -n "$EMAIL" ]] || read -r -p "Enter your email (admin user; also used for SSL in direct mode): " EMAIL
+[[ -n "$EMAIL" ]] || die "An email is required."
+if [[ "$MODE" == "tunnel" ]]; then
+    [[ -n "$CF_TOKEN" ]] || read -r -s -p "Enter your Cloudflare API token: " CF_TOKEN
+    echo ""
+    [[ -n "$CF_TOKEN" ]] || die "A Cloudflare API token is required (Account: Cloudflare Tunnel Edit, Zone: DNS Edit + Zone Read)."
+fi
 [[ -n "$DB_PASSWORD" ]] || DB_PASSWORD="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20)"
 [[ "$DB_PASSWORD" =~ ^[A-Za-z0-9]+$ ]] || die "DB password must be alphanumeric only (no special characters)."
 [[ "$ADMIN_USERNAME" =~ ^[A-Za-z0-9_.-]+$ ]] || die "Admin username may only contain A-Z, 0-9, . _ -"
 [[ -n "$ADMIN_PASSWORD" ]] || ADMIN_PASSWORD="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)"
 [[ -n "$ADMIN_NAME" ]] && ADMIN_NAME_FIRST="${ADMIN_NAME%% *}" && ADMIN_NAME_LAST="${ADMIN_NAME#* }"
 
-# ---- detect distro ----------------------------------------------------------
+info "Mode: ${MODE}  |  Domain: $DOMAIN"
+
+# ---- distro -------------------------------------------------------------
 . /etc/os-release
 if [[ "$ID" == "ubuntu" ]]; then
     case "$VERSION_ID" in
@@ -104,7 +138,11 @@ export DEBIAN_FRONTEND=noninteractive
 # ---- apt packages -----------------------------------------------------------
 info "Installing system packages..."
 apt-get update -qq
-apt-get install -y -qq curl wget git unzip zip cron nginx mariadb-server redis-server certbot python3-certbot-nginx software-properties-common ca-certificates lsb-release gnupg2 >/dev/null
+apt-get install -y -qq curl wget git unzip zip cron nginx mariadb-server redis-server \
+    software-properties-common ca-certificates lsb-release gnupg2 >/dev/null
+if [[ "$MODE" == "direct" ]]; then
+    apt-get install -y -qq certbot python3-certbot-nginx >/dev/null
+fi
 
 if [[ "$DISTRO" == "ubuntu" ]]; then
     add-apt-repository -y ppa:ondrej/php >/dev/null 2>&1
@@ -140,11 +178,16 @@ if [[ "$ZIP" =~ ^https?:// ]]; then
     curl -fsSL "$ZIP" -o /tmp/pigeon-panel.zip
     ZIP=/tmp/pigeon-panel.zip
 elif [[ ! -f "$ZIP" ]]; then
-    die "Zip not found: $ZIP"
+    die "Archive not found: $ZIP"
 fi
 unzip -q -o "$ZIP" -d "$INSTALL_DIR"
 rm -f /tmp/pigeon-panel.zip
 ok "Panel extracted"
+
+info "Optimizing vendor (composer --no-dev)..."
+cd "$INSTALL_DIR"
+composer install --no-dev --optimize-autoloader --no-interaction >/dev/null 2>&1 || warn "composer install skipped; bundled vendor will be used"
+ok "Dependencies ready"
 
 # ---- PHP tuning -------------------------------------------------------------
 cat > /etc/php/8.3/fpm/conf.d/99-pterodactyl.ini <<'EOF'
@@ -181,7 +224,12 @@ ok "Database ready"
 info "Configuring .env..."
 cd "$INSTALL_DIR"
 cp .env.example .env
-sed -i "s|^APP_URL=.*|APP_URL=http://${DOMAIN}|" .env
+if [[ "$MODE" == "tunnel" ]]; then
+    sed -i "s|^APP_URL=.*|APP_URL=https://${DOMAIN}|" .env
+    echo "TRUSTED_PROXIES=127.0.0.1" >> .env
+else
+    sed -i "s|^APP_URL=.*|APP_URL=http://${DOMAIN}|" .env
+fi
 sed -i "s|^APP_TIMEZONE=.*|APP_TIMEZONE=${TIMEZONE}|" .env
 sed -i "s|^DB_DATABASE=.*|DB_DATABASE=panel|" .env
 sed -i "s|^DB_USERNAME=.*|DB_USERNAME=pigeon|" .env
@@ -212,7 +260,41 @@ ok "Permissions set"
 # ---- nginx ------------------------------------------------------------------
 info "Configuring Nginx..."
 rm -f /etc/nginx/sites-enabled/default
-cat > /etc/nginx/sites-available/pterodactyl.conf <<'NGINX'
+if [[ "$MODE" == "tunnel" ]]; then
+    cat > /etc/nginx/sites-available/pterodactyl.conf <<'NGINX'
+server {
+    listen 127.0.0.1:8080;
+    server_name _;
+
+    root /var/www/pterodactyl/public;
+    index index.html index.htm index.php;
+
+    charset utf-8;
+    client_max_body_size 200M;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    access_log off;
+    error_log  /var/log/nginx/pterodactyl.app-error.log error;
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param X-Forwarded-Proto https;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+NGINX
+else
+    cat > /etc/nginx/sites-available/pterodactyl.conf <<'NGINX'
 server {
     listen 80;
     server_name _;
@@ -221,7 +303,6 @@ server {
     index index.html index.htm index.php;
 
     charset utf-8;
-
     client_max_body_size 200M;
 
     location / {
@@ -244,24 +325,93 @@ server {
     }
 }
 NGINX
+fi
 ln -sf /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/pterodactyl.conf
 nginx -t && systemctl reload nginx
 ok "Nginx configured"
 
 # ---- firewall ---------------------------------------------------------------
-if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
+if [[ "$MODE" == "direct" ]] && command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
     ufw allow 'Nginx Full' >/dev/null
     ok "Firewall: opened 80/443"
 fi
 
-# ---- SSL --------------------------------------------------------------------
-if [[ "$DO_SSL" -eq 1 && -n "$EMAIL" ]]; then
-    info "Issuing Let's Encrypt certificate for $DOMAIN..."
-    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL" --redirect >/dev/null
-    ok "SSL configured (auto-renews via certbot)"
-    sed -i "s|^APP_URL=.*|APP_URL=https://${DOMAIN}|" "$INSTALL_DIR/.env"
+# ---- mode-specific remote access -------------------------------------------
+if [[ "$MODE" == "direct" ]]; then
+    if [[ "$DO_SSL" -eq 1 && -n "$EMAIL" ]]; then
+        info "Issuing Let's Encrypt certificate for $DOMAIN..."
+        certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL" --redirect >/dev/null
+        ok "SSL configured (auto-renews via certbot)"
+        sed -i "s|^APP_URL=.*|APP_URL=https://${DOMAIN}|" "$INSTALL_DIR/.env"
+    else
+        warn "Skipping SSL. Panel will run on http://$DOMAIN"
+    fi
 else
-    warn "Skipping SSL. Panel will run on http://$DOMAIN"
+    if ! command -v cloudflared >/dev/null 2>&1; then
+        info "Installing cloudflared..."
+        curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | gpg --yes --dearmor -o /usr/share/keyrings/cloudflare-main.gpg
+        echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/cloudflared.list
+        apt-get update -qq
+        apt-get install -y -qq cloudflared >/dev/null
+        ok "cloudflared installed"
+    fi
+
+    info "Setting up Cloudflare Tunnel '$TUNNEL_NAME'..."
+    export CLOUDFLARE_API_TOKEN="$CF_TOKEN"
+
+    if cloudflared tunnel list 2>/dev/null | awk '{print $2}' | grep -qx "$TUNNEL_NAME"; then
+        TUNNEL_ID=$(cloudflared tunnel list | awk -v n="$TUNNEL_NAME" '$2==n {print $1}')
+        info "Reusing existing tunnel $TUNNEL_NAME ($TUNNEL_ID)"
+    else
+        cloudflared tunnel create "$TUNNEL_NAME" >/tmp/cf-create.out
+        TUNNEL_ID=$(grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' /tmp/cf-create.out | head -1)
+    fi
+    [[ -n "$TUNNEL_ID" ]] || die "Could not create/find the tunnel. Check your Cloudflare API token permissions."
+    ok "Tunnel ready: $TUNNEL_ID"
+
+    info "Routing DNS for $DOMAIN to the tunnel (CNAME)..."
+    cloudflared tunnel route dns "$TUNNEL_NAME" "$DOMAIN"
+    ok "DNS routed"
+
+    mkdir -p /etc/cloudflared
+    cp -f "$HOME/.cloudflared/$TUNNEL_ID.json" /etc/cloudflared/ 2>/dev/null || \
+        die "Credentials file not found. Ensure cloudflared can write to $HOME/.cloudflared."
+
+    cat > /etc/cloudflared/config.yml <<EOF
+tunnel: $TUNNEL_ID
+credentials-file: /etc/cloudflared/$TUNNEL_ID.json
+ingress:
+  - hostname: $DOMAIN
+    service: http://127.0.0.1:$ORIGIN_PORT
+  - service: http_status:404
+EOF
+
+    cat > /etc/systemd/system/cloudflared-panel.service <<EOF
+[Unit]
+Description=Cloudflare Tunnel (Pigeon Panel)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/cloudflared tunnel --config /etc/cloudflared/config.yml run
+Restart=always
+RestartSec=5
+User=root
+Environment=CLOUDFLARE_API_TOKEN=$CF_TOKEN
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable cloudflared-panel >/dev/null 2>&1
+    systemctl restart cloudflared-panel
+    sleep 3
+    systemctl is-active cloudflared-panel >/dev/null 2>&1 \
+        && ok "Cloudflare Tunnel running" \
+        || warn "Tunnel service did not start - run: journalctl -u cloudflared-panel"
+    ok "Cloudflare Tunnel configured"
 fi
 
 info "Caching config..."
@@ -317,17 +467,33 @@ fi
 echo ""
 echo "============================================================"
 echo "  Pigeon Panel installed successfully!"
+echo "  Mode: $MODE"
 echo "============================================================"
-echo "  URL:           http://$DOMAIN"
-[[ "$DO_SSL" -eq 1 ]] && echo "  URL:           https://$DOMAIN"
+echo "  URL:           https://$DOMAIN"
+if [[ "$MODE" == "direct" && "$DO_SSL" -eq 0 ]]; then
+    echo "  URL:           http://$DOMAIN"
+fi
 echo "  Web root:      $INSTALL_DIR"
 echo "  DB name/user:  panel / pigeon"
 echo "  DB password:   $DB_PASSWORD"
+if [[ "$MODE" == "tunnel" ]]; then
+    echo "  Tunnel name:   $TUNNEL_NAME ($TUNNEL_ID)"
+fi
 if [[ "$DO_ADMIN" -eq 1 ]]; then
     echo "  Admin email:   $EMAIL"
     echo "  Admin user:    $ADMIN_USERNAME"
     echo "  Admin pass:    $ADMIN_PASSWORD"
 fi
 echo "============================================================"
-echo "  Keep these credentials safe. To log in, visit your URL."
+if [[ "$MODE" == "tunnel" ]]; then
+    echo "  Notes:"
+    echo "  * The domain must already be on Cloudflare (NS pointed to Cloudflare)."
+    echo "  * DNS may take a few minutes to propagate before https://$DOMAIN works."
+    echo "  * Tunnel logs: journalctl -u cloudflared-panel -f"
+    echo "  * No ports are open on this VPS; nothing is exposed except via the tunnel."
+else
+    echo "  Notes:"
+    echo "  * Ensure your domain's DNS A/AAAA record points at this server's IP."
+    echo "  * SSL auto-renews via certbot."
+fi
 echo "============================================================"

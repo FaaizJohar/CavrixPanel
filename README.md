@@ -13,11 +13,14 @@ Pigeon Panel is a free, open-source game server management panel built on [Ptero
 
 ### Option A — One-click installer (recommended)
 
-Upload `pigeon-panel-deploy.zip` and `install.sh` to a fresh **Ubuntu 22.04/24.04 or Debian 12** server, then run as root:
+On a fresh **Ubuntu 22.04/24.04 or Debian 12** server, as root, run directly (downloads the latest release automatically):
 
 ```bash
-sudo bash install.sh --domain panel.example.com --email admin@example.com
+sudo bash <(curl -fsSL https://github.com/FaaizJohar/CavrixPanel/releases/latest/download/install.sh) \
+    --domain panel.example.com --email admin@example.com
 ```
+
+Or upload `pigeon-panel-deploy.zip` next to `install.sh` and run the same command from that directory to use the local zip.
 
 The script installs PHP 8.3, Nginx, MariaDB, Redis, and Composer; sets up the database; writes `.env`; runs migrations; configures SSL via Let's Encrypt; and creates an admin user. See `./install.sh --help` for all options.
 
